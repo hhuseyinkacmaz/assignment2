@@ -1,0 +1,53 @@
+huseyin@huseyin-VirtualBox:~/Desktop/linux-source-3.13.0/nice_inc$ cat nice_inc.c
+#include<linux/syscalls.h>
+#include<linux/kernel.h>
+
+asmlinkage int set_nice_inc(pid_t pid, int value){
+	struct task_struct *t;
+	t = task_find_by_vpid(pid);
+	if(value < 0)
+		return -EBADMSG;
+	t->nice_inc = value;
+	return t->nice_inc;
+}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+huseyin@huseyin-VirtualBox:~/Desktop/linux-source-3.13.0/nice_inc$ cat Makefile
+obj-y := nice_inc.o
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(fork.c)
+	p->nice = p->real_parent->nice + p->real_parent->nice_inc;
+	p->nice_inc = p->real_parent->nice_inc;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(init_taks.h)
+
+	.nice_inc	= 0,						\
+	.nice		= 0,						\
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(sched.h)
+
+	int nice;
+	int nice_inc;
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(syscalls.h)
+
+asmlinkage int	set_nice_inc(pid_t pid, int value);
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(syscall_32.tbl)
+
+355	i386	set_nice_inc		set_nice_inc
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
